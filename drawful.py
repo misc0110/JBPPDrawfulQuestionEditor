@@ -31,6 +31,8 @@ class App(object):
         self.qindex = None
         self.question_detail = {}
         self.prompts = {}
+        self.gui_elements = []
+        self.quest_elements = []
         
         ttk.Style().theme_use('clam')
         
@@ -87,9 +89,9 @@ class App(object):
         
         btnSearchAudio = ttk.Button(frmAudio, text='...')
         btnSearchAudio['command'] = self.search_audio
-        btnSearchAudio.pack(side=LEFT, expand=NO, fill='none')
+        btnSearchAudio.pack(side=LEFT, padx=32, pady=8, expand=NO, fill='none')
         
-        btnUpdate = ttk.Button(frmQuestDetails, text = 'Update')
+        btnUpdate = ttk.Button(frmQuestDetails, text = 'Save question')
         btnUpdate['command'] = self.update_question
         btnUpdate.pack(pady=8, padx=8, side=BOTTOM)
         
@@ -97,23 +99,39 @@ class App(object):
         frmQuestActions.pack(expand=NO, fill='both')
         
         btnNewQuest = ttk.Button(frmQuestActions, text = 'New question')
+        btnNewQuest['command'] = self.add_question
         btnNewQuest.pack(pady=8, padx=8, side=LEFT)
         
         btnDelQuest = ttk.Button(frmQuestActions, text = 'Delete question')
         btnDelQuest['command'] = self.delete_question
         btnDelQuest.pack(pady=8, padx=8, side=LEFT)
         
+        self.gui_elements = [btnSave, btnDelQuest, btnNewQuest, btnSearchAudio, btnUpdate, self.entryTerm, self.entrySpell, self.entryAudio, self.checkAudio]
+        self.quest_elements = [btnUpdate, btnSearchAudio, self.entryTerm, self.entrySpell, self.checkAudio, self.entryAudio]
+        for g in self.gui_elements:
+            g.configure(state='disabled')
+        btnLoad.configure(state='normal')
         
     def load_assets(self):
         filename = askopenfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Box assets.bin")
-        print(filename)
+        if not filename or not os.path.isfile(filename):
+            messagebox.showwarning("Open file", "Could not open file!")
+            return
+        
         toplevel = Toplevel()
         label1 = Label(toplevel, text="Please wait, parsing assets...")
         label1.pack(padx=16, pady=16)
-        self.root.update()        
-        if(filename): jbpb.uncompress(filename)
-        self.parse_questions()
+        self.root.update()
+        try:
+            if(filename): jbpb.uncompress(filename)
+            self.parse_questions()
+        except:
+            messagebox.showwarning("Parse file", "Could not parse assets file!")
         toplevel.destroy()
+        for g in self.gui_elements:
+            g.configure(state='normal')
+        for g in self.quest_elements:
+            g.configure(state='disabled')
     
     def save_assets(self):
         filename = asksaveasfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Box assets.bin")
@@ -152,12 +170,16 @@ class App(object):
             self.set_field(self.question_detail[self.qid], "JokeAudio", os.path.basename(self.audioFile.get()).replace(".mp3", ""))
         
         self.questions.item(self.questions.get_children()[self.qindex], text=self.termVal.get())
+        self.termValBefore = None
     
     def question_clicked(self, qid):
         if self.termValBefore:
             if self.termValBefore != self.termVal.get() or self.alternateSpellingsValBefore != self.alternateSpellingsVal.get() or self.jokeAudioBefore != self.jokeAudio.get() or self.audioFileBefore != self.audioFile.get():
                 if messagebox.askyesno(0.0, "Question changed! Do you want to save?"):
                     self.update_question()
+            
+        for g in self.quest_elements:
+            g.configure(state='normal')
             
         curItem = self.questions.focus()
         self.qindex = self.questions.index(curItem)
@@ -187,7 +209,40 @@ class App(object):
             
             del self.prompts["items"][self.qindex]
             del self.question_detail[self.qid]
+            
     
+    def add_question(self):
+        self.max_id += 1
+        qid = self.max_id
+        
+        self.prompts["items"].append({"id": qid, "text": "<new>"})
+        self.question_detail[qid] = {
+          "length": 4,
+          "fields": [
+            {
+                "n": "QuestionText",
+                "t": "S",
+                "v": "<new>"
+            },
+            {
+                "n": "AlternateSpellings",
+                "t": "S",
+                "v": ""
+            },
+            {
+                "n": "HasJokeAudio",
+                "t": "B",
+                "v": "false"
+            },
+            {
+                "n": "JokeAudio",
+                "t": "A",
+                "v": ""
+            }
+          ]    
+        }
+        self.questions.insert("", "end", tags=(qid), text="<new>")
+
     
     def get_field(self, val, name):
         for f in val["fields"]:
@@ -205,11 +260,13 @@ class App(object):
         return None
     
     def parse_questions(self):
+        self.max_id = 0
         with open("assets/games/Drawful/content/prompts.jet", "r") as f:
             self.prompts = json.load(f)
             self.questions.delete(*self.questions.get_children())
             for q in self.prompts["items"]:
                 self.questions.insert("", "end", tags=(q["id"]), text=q["text"])
+                if int(q["id"]) > self.max_id: self.max_id = int(q["id"])
                 # get details
                 with open("assets/games/Drawful/content/prompts/" + str(q["id"]) + "/data.jet") as det:
                     self.question_detail[q["id"]] = json.load(det)
