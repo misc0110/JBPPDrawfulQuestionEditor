@@ -3,6 +3,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import asksaveasfilename
+from tkinter import messagebox
+from shutil import copyfile
 import json
 import os
 
@@ -18,11 +20,21 @@ class App(object):
         
         self.termVal = tkinter.StringVar()
         self.alternateSpellingsVal = tkinter.StringVar()
+        self.jokeAudio = tkinter.IntVar()
+        self.audioFile = tkinter.StringVar()
+        self.termValBefore = None
+        self.alternateSpellingsValBefore = None
+        self.jokeAudioBefore = None
+        self.audioFileBefore = None
         
+        self.qid = None
+        self.qindex = None
         self.question_detail = {}
         self.prompts = {}
         
         ttk.Style().theme_use('clam')
+        
+        self.root.minsize(width=700, height=400)
         
         self.main_screen()
 
@@ -46,7 +58,7 @@ class App(object):
         
         self.questions = ttk.Treeview(frmQuestions)
         self.questions.pack(expand=YES, fill='both', side = LEFT)
-        self.questions.bind('<ButtonRelease-1>', self.question_clicked)
+        self.questions.bind('<<TreeviewSelect>>', self.question_clicked)
         ysb = ttk.Scrollbar(frmQuestions, orient='vertical', command=self.questions.yview)
         self.questions.configure(yscroll=ysb.set)
         ysb.pack(side=LEFT, expand=NO, fill='y')
@@ -61,6 +73,21 @@ class App(object):
         ttk.Label(frmQuestDetails, text='Alternate spellings').pack()
         self.entrySpell = ttk.Entry(frmQuestDetails, textvariable=self.alternateSpellingsVal)
         self.entrySpell.pack(padx=32, pady=8, expand=NO, fill='x')
+        
+        frmAudio = ttk.Frame(frmQuestDetails)
+        frmAudio.pack(expand=NO, fill='both')
+        
+        ttk.Label(frmAudio, text='Joke Audio File').pack()
+        self.checkAudio = ttk.Checkbutton(frmAudio, text='Has Joke Audio', variable=self.jokeAudio)
+        self.checkAudio.pack(padx=32, pady=8, expand=NO, fill='x')
+        
+        #ttk.Label(frmAudio, text='Joke Audio File').pack()
+        self.entryAudio = ttk.Entry(frmAudio, textvariable=self.audioFile)
+        self.entryAudio.pack(padx=32, pady=8, expand=YES, fill='x', side=LEFT)
+        
+        btnSearchAudio = ttk.Button(frmAudio, text='...')
+        btnSearchAudio['command'] = self.search_audio
+        btnSearchAudio.pack(side=LEFT, expand=NO, fill='none')
         
         btnUpdate = ttk.Button(frmQuestDetails, text = 'Update')
         btnUpdate['command'] = self.update_question
@@ -82,7 +109,7 @@ class App(object):
         print(filename)
         toplevel = Toplevel()
         label1 = Label(toplevel, text="Please wait, parsing assets...")
-        label1.pack()
+        label1.pack(padx=16, pady=16)
         self.root.update()        
         if(filename): jbpb.uncompress(filename)
         self.parse_questions()
@@ -92,31 +119,59 @@ class App(object):
         filename = asksaveasfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Box assets.bin")
         toplevel = Toplevel()
         label1 = Label(toplevel, text="Please wait, saving assets...")
-        label1.pack()
+        label1.pack(padx=16, pady=16)
         self.root.update()        
 
         print(self.prompts)
         print(self.question_detail)
 
         self.save_questions()
-        jbpb.compress(filename)
+        
+        if filename: jbpb.compress(filename)
         
         toplevel.destroy()
 
+    def search_audio(self):
+        filename = askopenfilename(defaultextension=".mp3", filetypes=[("MP3", ".mp3")], initialdir=os.path.dirname(self.audioFile.get()), initialfile=os.path.basename(self.audioFile.get()), parent=self.root, title="Choose an audio file")
+        if filename:
+            self.audioFile.set(filename)
+
     
     def update_question(self):
+        print(self.question_detail[self.qid])
         self.prompts["items"][self.qindex]["text"] = self.termVal.get()
         self.set_field(self.question_detail[self.qid], "QuestionText", self.termVal.get())
         self.set_field(self.question_detail[self.qid], "AlternateSpellings", self.alternateSpellingsVal.get())
+        self.set_field(self.question_detail[self.qid], "HasJokeAudio", "true" if self.jokeAudio.get() != 0 else "false")
+        
+        if os.path.isfile(self.audioFile.get()):
+            try:
+                copyfile(self.audioFile.get(), os.path.join("assets/games/Drawful/content/prompts/" + str(self.qid), os.path.basename(self.audioFile.get())))
+            except:
+                pass
+            self.set_field(self.question_detail[self.qid], "JokeAudio", os.path.basename(self.audioFile.get()).replace(".mp3", ""))
         
         self.questions.item(self.questions.get_children()[self.qindex], text=self.termVal.get())
     
     def question_clicked(self, qid):
+        if self.termValBefore:
+            if self.termValBefore != self.termVal.get() or self.alternateSpellingsValBefore != self.alternateSpellingsVal.get() or self.jokeAudioBefore != self.jokeAudio.get() or self.audioFileBefore != self.audioFile.get():
+                if messagebox.askyesno(0.0, "Question changed! Do you want to save?"):
+                    self.update_question()
+            
         curItem = self.questions.focus()
         self.qindex = self.questions.index(curItem)
         self.qid = self.questions.item(curItem)["tags"][0]
         self.termVal.set(self.get_field(self.question_detail[self.qid], "QuestionText"))
         self.alternateSpellingsVal.set(self.get_field(self.question_detail[self.qid], "AlternateSpellings"))
+        self.jokeAudio.set(self.get_field(self.question_detail[self.qid], "HasJokeAudio") == "true")
+        if self.jokeAudio.get() != 0: self.audioFile.set(os.path.join("assets/games/Drawful/content/prompts/" + str(self.qid), self.get_field(self.question_detail[self.qid], "JokeAudio") + ".mp3"))
+        else: self.audioFile.set("")
+        self.termValBefore = self.termVal.get()
+        self.alternateSpellingsValBefore = self.alternateSpellingsVal.get()
+        self.jokeAudioBefore = self.jokeAudio.get()
+        self.audioFileBefore = self.audioFile.get()
+        
         
     def delete_question(self):
         if self.questions.selection():
@@ -137,6 +192,8 @@ class App(object):
     def get_field(self, val, name):
         for f in val["fields"]:
             if f["n"] == name:
+                if "v" not in f:
+                    return ""
                 return f["v"]
         return None
     
@@ -166,7 +223,6 @@ class App(object):
                 os.mkdir(path)
             with open(path + "/data.jet", "w") as det:
                 json.dump(self.question_detail[q["id"]], det)
-                # TODO: joke audio
             
             
 app = App()
