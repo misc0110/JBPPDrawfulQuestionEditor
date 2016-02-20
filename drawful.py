@@ -150,7 +150,7 @@ class App(object):
         label1.pack(padx=16, pady=16)
         self.root.update()
         try:
-            if(filename): jbpb.uncompress(filename)
+            if(filename): jbpp.uncompress(filename)
             self.parse_questions()
         except:
             messagebox.showwarning("Parse file", "Could not parse assets file!")
@@ -173,7 +173,7 @@ class App(object):
 
         self.save_questions()
         
-        if filename: jbpb.compress(filename)
+        if filename: jbpp.compress(filename)
         
         toplevel.destroy()
         
@@ -190,7 +190,7 @@ class App(object):
         self.root.update()        
         self.save_questions()
         
-        jbpb.create_patch(filename, "assets/games/Drawful/content", {"game": "Drawful", "name": pname})
+        jbpp.create_patch(filename, "assets/games/Drawful/content", {"game": "Drawful", "name": pname})
         
         toplevel.destroy()
         
@@ -210,7 +210,7 @@ class App(object):
         self.root.update()
         
         try:
-            jbpb.apply_patch(filename)
+            jbpp.apply_patch(filename)
             self.parse_questions()
         except:
             messagebox.showwarning("Parse file", "Could not parse assets file!")
