@@ -11,7 +11,7 @@ import os
 import io
 import zipfile
 
-import jbpb
+import jbpp
 
 class App(object):
     def __init__(self):
@@ -19,7 +19,7 @@ class App(object):
         self.root = tkinter.Tk()
         self.question = None
         # self.root.iconbitmap("time.ico")
-        self.root.title("JBPB Drawful Question Editor")
+        self.root.title("JBPP Drawful Question Editor")
         
         self.termVal = tkinter.StringVar()
         self.alternateSpellingsVal = tkinter.StringVar()
@@ -137,7 +137,7 @@ class App(object):
         
         
     def load_assets(self):
-        filename = askopenfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Box assets.bin")
+        filename = askopenfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Pack assets.bin")
         if not filename:
             return
         
@@ -162,7 +162,7 @@ class App(object):
     
     
     def save_assets(self):
-        filename = asksaveasfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Box assets.bin")
+        filename = asksaveasfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Pack assets.bin")
         toplevel = Toplevel()
         label1 = Label(toplevel, text="Please wait, saving assets...")
         label1.pack(padx=16, pady=16)

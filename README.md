@@ -1,11 +1,11 @@
-Jackbox Party Box - Drawful Question Editor
+Jackbox Party Pack - Drawful Question Editor
 =========
 
-Drawful Question Editor is a question editor for the Drawful game in Jackbox Party Box (Vol. 1). It allows to edit, add and delete questions. 
+Drawful Question Editor is a question editor for the Drawful game in Jackbox Party Pack (Vol. 1). It allows to edit, add and delete questions. 
 
 # Requirements
 
-The program needs python3, python3-tk and Jackbox Party Box installed. 
+The program needs python3, python3-tk and Jackbox Party Pack installed. 
 
 # Usage
 
@@ -13,7 +13,7 @@ Start with
 `python3 drawful.py`
 
 A default usage example would be the following
-+ **Step 1**: Click `Load` and navigate to the Jackbox Party Box folder, select the file *assets.bin*. The file is loaded which can take up to one minute. If the file was loaded the last time you opened the program, you can continue working without loading the file again.
++ **Step 1**: Click `Load` and navigate to the Jackbox Party Pack folder, select the file *assets.bin*. The file is loaded which can take up to one minute. If the file was loaded the last time you opened the program, you can continue working without loading the file again.
 + **Step 2**: The questions can be seen on the left side. Click on any question to edit it. 
   * *Term*: this is the term that is shown to the user and has to be drawn
   * *Alternate spellings*: Alternate spellings of the term that should be accepted. If you want to enter more than one alternate spelling, separate it with `|`, e.g. "color|colour".
