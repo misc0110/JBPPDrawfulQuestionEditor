@@ -187,20 +187,7 @@ class App(object):
         self.root.update()        
         self.save_questions()
         
-        z = io.BytesIO()
-        zfile = zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED, False)
-
-        for root, dirs, files in os.walk("assets/games/Drawful/content"):
-            for f in files:
-                zfile.write(os.path.join(root, f))
-                
-        for zf in zfile.filelist:
-            zf.create_system = 0
-        
-        zfile.close()
-        z.seek(0)
-        with open(filename, "wb") as of:
-            of.write(z.read())
+        jbpb.create_patch(filename, "assets/games/Drawful/content", {"game": "Drawful"})
         
         toplevel.destroy()
         
@@ -218,10 +205,9 @@ class App(object):
         label1 = Label(toplevel, text="Please wait, parsing assets...")
         label1.pack(padx=16, pady=16)
         self.root.update()
+        
         try:
-            with open(filename, "rb") as f:
-                    zfile = zipfile.ZipFile(io.BytesIO(f.read()))
-                    zfile.extractall()
+            jbpb.apply_patch(filename)
             self.parse_questions()
         except:
             messagebox.showwarning("Parse file", "Could not parse assets file!")
