@@ -182,7 +182,7 @@ class App(object):
         filename = asksaveasfilename(defaultextension=".jbp", filetypes=[("Jackbox Party Patch", ".jbp")], initialfile="drawful.jbp", parent=self.root, title="Save as patch")
         if not filename: return
     
-        pname = simpledialog.askstring("Patch Name", "Name of patch (e.g. 'German translation')")
+        pname = simpledialog.askstring("Patch Name", "Name of patch (e.g. 'German translation')", parent=self.root)
     
         toplevel = Toplevel()
         label1 = Label(toplevel, text="Please wait, saving patch...")
