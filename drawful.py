@@ -40,6 +40,7 @@ class App(object):
         
         self.main_screen()
 
+
     def main_screen(self):
         self.usrVal = tkinter.StringVar()
         self.pwdVal = tkinter.StringVar()
@@ -117,6 +118,10 @@ class App(object):
             for g in self.gui_elements:
                 g.configure(state='disabled')
             btnLoad.configure(state='normal')
+
+        self.entryTerm.bind("<Return>", lambda qid: [self.update_question(), self.entrySpell.focus_set()])
+        self.entrySpell.bind("<Return>", lambda qid: self.update_question())
+        self.entryAudio.bind("<Return>", lambda qid: self.update_question())
         
         
     def load_assets(self):
@@ -143,6 +148,7 @@ class App(object):
         for g in self.quest_elements:
             g.configure(state='disabled')
     
+    
     def save_assets(self):
         filename = asksaveasfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Box assets.bin")
         toplevel = Toplevel()
@@ -158,6 +164,7 @@ class App(object):
         if filename: jbpb.compress(filename)
         
         toplevel.destroy()
+
 
     def search_audio(self):
         filename = askopenfilename(defaultextension=".mp3", filetypes=[("MP3", ".mp3")], initialdir=os.path.dirname(self.audioFile.get()), initialfile=os.path.basename(self.audioFile.get()), parent=self.root, title="Choose an audio file")
@@ -212,6 +219,7 @@ class App(object):
         self.alternateSpellingsValBefore = self.alternateSpellingsVal.get()
         self.jokeAudioBefore = self.jokeAudio.get()
         self.audioFileBefore = self.audioFile.get()
+        self.entryTerm.focus_set()
         
         
     def delete_question(self):
