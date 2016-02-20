@@ -7,6 +7,8 @@ from tkinter import messagebox
 from shutil import copyfile
 import json
 import os
+import io
+import zipfile
 
 import jbpb
 
@@ -51,6 +53,15 @@ class App(object):
         btnLoad = ttk.Button(frm, text = 'Load')
         btnLoad['command'] = self.load_assets
         btnLoad.pack(pady=8, padx=8, side=LEFT)
+        
+        btnApplyPatch = ttk.Button(frm, text = 'Apply patch')
+        btnApplyPatch['command'] = self.load_patch
+        btnApplyPatch.pack(pady=8, padx=8, side=LEFT)
+        
+        
+        btnPatch = ttk.Button(frm, text = 'Save as patch')
+        btnPatch['command'] = self.save_patch
+        btnPatch.pack(pady=8, padx=8, side=LEFT)
         
         btnSave = ttk.Button(frm, text = 'Create assets')
         btnSave['command'] = self.save_assets
@@ -107,7 +118,7 @@ class App(object):
         btnDelQuest['command'] = self.delete_question
         btnDelQuest.pack(pady=8, padx=8, side=LEFT)
         
-        self.gui_elements = [btnSave, btnDelQuest, btnNewQuest, btnSearchAudio, btnUpdate, self.entryTerm, self.entrySpell, self.entryAudio, self.checkAudio]
+        self.gui_elements = [btnPatch, btnApplyPatch, btnSave, btnDelQuest, btnNewQuest, btnSearchAudio, btnUpdate, self.entryTerm, self.entrySpell, self.entryAudio, self.checkAudio]
         self.quest_elements = [btnUpdate, btnSearchAudio, self.entryTerm, self.entrySpell, self.checkAudio, self.entryAudio]
         
         if os.path.isdir("assets"):
@@ -164,7 +175,58 @@ class App(object):
         if filename: jbpb.compress(filename)
         
         toplevel.destroy()
+        
+        
+    def save_patch(self):
+        filename = asksaveasfilename(defaultextension=".jbp", filetypes=[("Jackbox Party Patch", ".jbp")], initialfile="drawful.jbp", parent=self.root, title="Save as patch")
+        if not filename: return
+    
+        toplevel = Toplevel()
+        label1 = Label(toplevel, text="Please wait, saving patch...")
+        label1.pack(padx=16, pady=16)
+        self.root.update()        
+        self.save_questions()
+        
+        z = io.BytesIO()
+        zfile = zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED, False)
 
+        for root, dirs, files in os.walk("assets/games/Drawful/content"):
+            for f in files:
+                zfile.write(os.path.join(root, f))
+                
+        for zf in zfile.filelist:
+            zf.create_system = 0
+        
+        zfile.close()
+        z.seek(0)
+        with open(filename, "wb") as of:
+            of.write(z.read())
+        
+        toplevel.destroy()
+        
+        
+    def load_patch(self):
+        filename = askopenfilename(defaultextension=".jbp", filetypes=[("Jackbox Party Patch", ".jbp")], parent=self.root, title="Choose Jackbox Party Patch file")
+        if not filename:
+            return
+        
+        if not os.path.isfile(filename):
+            messagebox.showwarning("Open file", "Could not open file!")
+            return
+        
+        toplevel = Toplevel()
+        label1 = Label(toplevel, text="Please wait, parsing assets...")
+        label1.pack(padx=16, pady=16)
+        self.root.update()
+        try:
+            with open(filename, "rb") as f:
+                    zfile = zipfile.ZipFile(io.BytesIO(f.read()))
+                    zfile.extractall()
+            self.parse_questions()
+        except:
+            messagebox.showwarning("Parse file", "Could not parse assets file!")
+        toplevel.destroy()
+        
 
     def search_audio(self):
         filename = askopenfilename(defaultextension=".mp3", filetypes=[("MP3", ".mp3")], initialdir=os.path.dirname(self.audioFile.get()), initialfile=os.path.basename(self.audioFile.get()), parent=self.root, title="Choose an audio file")
