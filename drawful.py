@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import asksaveasfilename
+from tkinter import simpledialog
 from tkinter import messagebox
 from shutil import copyfile
 import json
@@ -181,13 +182,15 @@ class App(object):
         filename = asksaveasfilename(defaultextension=".jbp", filetypes=[("Jackbox Party Patch", ".jbp")], initialfile="drawful.jbp", parent=self.root, title="Save as patch")
         if not filename: return
     
+        pname = simpledialog.askstring("Patch Name", "Name of patch (e.g. 'German translation')")
+    
         toplevel = Toplevel()
         label1 = Label(toplevel, text="Please wait, saving patch...")
         label1.pack(padx=16, pady=16)
         self.root.update()        
         self.save_questions()
         
-        jbpb.create_patch(filename, "assets/games/Drawful/content", {"game": "Drawful"})
+        jbpb.create_patch(filename, "assets/games/Drawful/content", {"game": "Drawful", "name": pname})
         
         toplevel.destroy()
         
