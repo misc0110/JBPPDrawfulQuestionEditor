@@ -20,4 +20,6 @@ A default usage example would be the following
   * *Joke Audio File*: You can add a short audio file for jokes. Check the checkbox and enter the path to the audio file to do so.
   * *Save question*: Save the question. It is not yet written back to the game, this is done using `Create assets`.
 + **Step 3 (optional)**: Add new questions using `New Question` or delete one or multiple questions by selecting them and clicking `Delete question`.
-+ **Step 4**: If you are done editing questions, either click `Create assets` to create a new *assets.bin*. Replace the original *assets.bin* with the newly generated to use your new questions (it is suggested to do a backup first). Or create a patch to distribute it to your friends using `Save as patch`. You can then load the original *assets.bin*, and apply the patch using `Apply patch`. This has the advantage that you do not need to share the 350MB *assets.bin* file. 
++ **Step 4 (without Loader)**: If you are done editing questions, click `Create assets` to create a new *assets.bin*. Replace the original *assets.bin* with the newly generated to use your new questions (it is suggested to do a backup first). 
++ **Step 4 (with Loader)**: Create a patch for the mod loader (and to distribute it to your friends) using `Save as patch`. 
++ Copy the patch and the files `loader.py` and `jbpp.py` to the game directory. If you start the loader (`python3 loader.py`), you can select the patches to apply to the game. If you want to edit a patch, first load the original *assets.bin*, and apply the patch using `Apply patch`.  
