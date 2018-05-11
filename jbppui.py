@@ -26,6 +26,37 @@ QUESTION = 2
 QUESTION_TO_CONTENT = 1
 CONTENT_TO_QUESTION = 2
 
+        
+class CheckVar(Variable):
+    _default = 0
+    def __init__(self, master=None, value=None, name=None, on_val = True, off_val = False, field=None, ui = None):
+        Variable.__init__(self, master, value, name)
+        self._on_val = on_val
+        self._off_val = off_val
+        self._ui = ui
+        self._field = field
+
+    def set(self, val):
+        self._tk.globalsetvar(self._name, 1 if val == self._on_val or val == 1 or val is True else 0)
+        self.check_dependency()
+
+    def get(self):
+        value = self._tk.globalgetvar(self._name)
+        return self._on_val if self._tk.getint(value) == 1 else self._off_val
+    
+    def check_dependency(self):
+        if self._ui is not None:
+            for u in self._ui:
+                if u["depends"] == self._field:
+                    u["handle"].configure(state="enabled" if self._tk.getint(self._tk.globalgetvar(self._name)) == 1 else "disabled")
+                if u["depends"] == "!" + self._field:
+                    u["handle"].configure(state="disabled" if self._tk.getint(self._tk.globalgetvar(self._name)) == 1 else "enabled")
+    
+    def cb(self):
+        self.check_dependency()
+        
+
+
 class JBPPUI(object):
     def __init__(self):
         """ init application """
@@ -141,8 +172,11 @@ class JBPPUI(object):
         
                 
         for u in self.ui_template:
-            ttk.Label(frmQuestDetails, text=u["name"]).pack()
-            element = ttk.Entry(frmQuestDetails, textvariable=u["variable"])
+            if u["type"] == TEXTBOX:
+                ttk.Label(frmQuestDetails, text=u["name"]).pack()
+                element = ttk.Entry(frmQuestDetails, textvariable=u["variable"])
+            elif u["type"] == CHECKBOX:
+                element = ttk.Checkbutton(frmQuestDetails, text=u["name"], variable=u["variable"], command=u["variable"].cb)
             element.pack(padx=32, pady=8, expand=NO, fill='x')
             u["handle"] = element
             self.quest_elements.append(element)
@@ -166,15 +200,19 @@ class JBPPUI(object):
         self.init_questions()
 
 
-    def add_ui_field(self, name, typ, field, default="", is_list_text = False):
+    def add_ui_field(self, name, typ, field, default="", is_list_text = False, depends = "", on_value = "true", off_value = "false", provider = QUESTION):
         self.ui_template.append({
             "name": name, 
             "type": typ, 
-            "variable": tkinter.StringVar() if typ != CHECKBOX else tkinter.IntVar(), 
+            "variable": tkinter.StringVar() if typ != CHECKBOX else CheckVar(on_val=on_value, off_val=off_value, field=field, ui=self.ui_template), 
             "default": default, 
             "field": field,
             "handle": None,
-            "lasttext": default
+            "lasttext": default,
+            "on_value": on_value,
+            "off_value": off_value,
+            "depends": depends,
+            "provider": provider
         })
         if is_list_text: 
             self.list_category = field
@@ -295,7 +333,10 @@ class JBPPUI(object):
         
         
         for u in self.ui_template:
-            self.set_field(self.question_detail[self.qid], u["field"], u["variable"].get())
+            if u["provider"] == QUESTION:
+                self.set_field(self.question_detail[self.qid], u["field"], u["variable"].get())
+            elif u["provider"] == CONTENT:
+                self.prompts[self.content_field][self.qindex][u["field"]] = u["variable"].get()
             
         #if os.path.isfile(self.audioFile.get()):
             #try:
@@ -345,7 +386,11 @@ class JBPPUI(object):
         self.qid = self.questions.item(curItem)["tags"][0]
         
         for u in self.ui_template:
-            u["variable"].set(self.get_field(self.question_detail[self.qid], u["field"]))
+            if u["provider"] == QUESTION:
+                u["variable"].set(self.get_field(self.question_detail[self.qid], u["field"]))
+            elif u["provider"] == CONTENT:
+                u["variable"].set(self.prompts[self.content_field][self.qindex][u["field"]])
+
             u["lasttext"] = u["variable"].get()
         
         self.ui_template[0]["handle"].focus_set()
