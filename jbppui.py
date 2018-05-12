@@ -12,6 +12,7 @@ import json
 import os
 import io
 import zipfile
+import copy
 
 import jbpp
 
@@ -420,12 +421,12 @@ class JBPPUI(object):
         self.max_id += 1
         qid = self.max_id
         
-        tc = dict(self.content_template)
+        tc = copy.deepcopy(self.content_template)
         tc["id"] = qid
         self.prompts[self.content_field].append(tc)
         
         
-        self.question_detail[qid] = dict(self.question_template) 
+        self.question_detail[qid] = copy.deepcopy(self.question_template) 
         
         it = self.questions.insert("", "end", tags=(qid), text="<new>")
         self.questions.focus(it)
@@ -475,14 +476,25 @@ class JBPPUI(object):
     def save_questions(self, qid=None):
         with open(os.path.join(self.path, self.content_file), "w") as f:
             json.dump(self.prompts, f)
-            
+        
+        print("---------------------------")
+        print(self.prompts)
+        print("---------------------------")
+        
+        
         for q in self.prompts[self.content_field]:
-            if not qid and q["id"] != qid: continue
+            #if not qid and q["id"] != qid: continue
             path = os.path.join(self.path, self.question_path) % str(q["id"])
             if not os.path.isdir(path):
                 os.mkdir(path)
             with open(os.path.join(path, self.question_file), "w") as det:
                 json.dump(self.question_detail[q["id"]], det)
             
+            print(q["id"])
+            print("---------------------------")
+            print(self.question_detail[q["id"]])
+            print("---------------------------")
+            print("---------------------------")
+
             
 
