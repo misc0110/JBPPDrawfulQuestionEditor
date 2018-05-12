@@ -7,6 +7,8 @@ class Quiplash(jbppui.JBPPUI):
     def __init__(self):
         super().__init__()
         
+        super().set_game_name("Quiplash")
+        
         super().set_path("assets/games/Quiplash")
         super().set_content_file("content/QuiplashQuestion.jet")
         super().set_question_path("content/QuiplashQuestion/%s")

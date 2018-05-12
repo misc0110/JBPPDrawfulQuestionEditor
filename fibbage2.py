@@ -7,6 +7,8 @@ class Fibbage2(jbppui.JBPPUI):
     def __init__(self):
         super().__init__()
         
+        super().set_game_name("Fibbage2")
+        
         super().set_path("assets/games/Fibbage2")
         super().set_content_file("content/fibbageshortie.jet")
         super().set_question_path("content/fibbageshortie/%s")

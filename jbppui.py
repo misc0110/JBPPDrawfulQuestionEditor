@@ -66,6 +66,7 @@ class JBPPUI(object):
         self.root.title("JBPP Question Editor")
         
         self.path = ""
+        self.gamename = ""
         
         self.qid = None
         self.qindex = None
@@ -130,6 +131,10 @@ class JBPPUI(object):
         
     def set_content_field(self, cf):
         self.content_field = cf
+        
+    
+    def set_game_name(self, name):
+        self.gamename = name
         
         
     def add_copy_field(self, from_field, to_field, direction = QUESTION_TO_CONTENT):
@@ -263,8 +268,8 @@ class JBPPUI(object):
         label1.pack(padx=16, pady=16)
         self.root.update()        
 
-        print(self.prompts)
-        print(self.question_detail)
+        #print(self.prompts)
+        #print(self.question_detail)
 
         self.save_questions()
         
@@ -321,7 +326,7 @@ class JBPPUI(object):
 
     
     def update_question(self):
-        print(self.question_detail[self.qid])
+        #print(self.question_detail[self.qid])
         #self.prompts[self.content_field][self.qindex][self.list_category] = self.list_category_val.get() 
         for c in self.copy_list:
             if c["direction"] == QUESTION_TO_CONTENT:
@@ -363,7 +368,7 @@ class JBPPUI(object):
         
         for u in self.ui_template:
             if u["variable"].get() != u["lasttext"]:
-                print("%s != %s" % (u["variable"].get(), u["lasttext"]))
+                #print("%s != %s" % (u["variable"].get(), u["lasttext"]))
                 return True
         return False
     
@@ -477,9 +482,9 @@ class JBPPUI(object):
         with open(os.path.join(self.path, self.content_file), "w") as f:
             json.dump(self.prompts, f)
         
-        print("---------------------------")
-        print(self.prompts)
-        print("---------------------------")
+        #print("---------------------------")
+        #print(self.prompts)
+        #print("---------------------------")
         
         
         for q in self.prompts[self.content_field]:
@@ -490,11 +495,11 @@ class JBPPUI(object):
             with open(os.path.join(path, self.question_file), "w") as det:
                 json.dump(self.question_detail[q["id"]], det)
             
-            print(q["id"])
-            print("---------------------------")
-            print(self.question_detail[q["id"]])
-            print("---------------------------")
-            print("---------------------------")
+            #print(q["id"])
+            #print("---------------------------")
+            #print(self.question_detail[q["id"]])
+            #print("---------------------------")
+            #print("---------------------------")
 
             
 

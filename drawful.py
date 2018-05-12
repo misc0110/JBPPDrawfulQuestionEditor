@@ -7,6 +7,8 @@ class Drawful(jbppui.JBPPUI):
     def __init__(self):
         super().__init__()
         
+        super().set_game_name("Drawful")
+        
         super().set_path("assets/games/Drawful")
         super().set_content_file("content/prompts.jet")
         super().set_question_path("content/prompts/%s")

@@ -3,9 +3,11 @@
 import jbpp
 import jbppui
 
-class Fibbage2(jbppui.JBPPUI):
+class Fibbage(jbppui.JBPPUI):
     def __init__(self):
         super().__init__()
+        
+        super().set_game_name("Fibbage")
         
         super().set_path("assets/games/Fibbage")
         super().set_content_file("content/shortie.jet")
@@ -96,5 +98,5 @@ class Fibbage2(jbppui.JBPPUI):
 
             
             
-app = Fibbage2()
+app = Fibbage()
 app.root.mainloop()  

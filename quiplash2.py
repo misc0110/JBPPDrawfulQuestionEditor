@@ -3,9 +3,11 @@
 import jbpp
 import jbppui
 
-class Quiplash(jbppui.JBPPUI):
+class Quiplash2(jbppui.JBPPUI):
     def __init__(self):
         super().__init__()
+        
+        super().set_game_name("Quiplash2")
         
         super().set_path("assets/games/Quiplash2")
         super().set_content_file("content/QuiplashQuestion.jet")
@@ -70,5 +72,5 @@ class Quiplash(jbppui.JBPPUI):
 
             
             
-app = Quiplash()
+app = Quiplash2()
 app.root.mainloop()  
