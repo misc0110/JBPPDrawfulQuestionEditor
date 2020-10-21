@@ -3,8 +3,7 @@
 import tkinter
 from tkinter import *
 from tkinter import ttk
-from tkinter.filedialog import askopenfilename
-from tkinter.filedialog import asksaveasfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename, askdirectory
 from tkinter import simpledialog
 from tkinter import messagebox
 from shutil import copyfile
@@ -237,13 +236,19 @@ class JBPPUI(object):
 
        
     def load_assets(self):
-        filename = askopenfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Pack assets.bin")
-        if not filename:
-            return
-        
-        if not os.path.isfile(filename):
-            messagebox.showwarning("Open file", "Could not open file!")
-            return
+#        filename = askopenfilename(defaultextension=".bin", filetypes=[("assets.bin", ".bin")], initialfile="assets.bin", parent=self.root, title="Choose Jackbox Party Pack assets.bin")
+#        if not filename:
+#            return
+#        
+#        if not os.path.isfile(filename):
+#            messagebox.showwarning("Open file", "Could not open file!")
+#            return
+        game_dir = askdirectory()
+        if os.path.isfile(os.path.join(game_dir, "assets.bin")): # non-steam version
+            filename = os.path.join(game_dir, "assets.bin")
+        else: # steam version
+            self.set_path(os.path.join(game_dir, self.path.replace("assets/", "")))
+            filename = None
         
         toplevel = Toplevel()
         label1 = Label(toplevel, text="Please wait, parsing assets...")
